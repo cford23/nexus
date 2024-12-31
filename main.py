@@ -1,3 +1,4 @@
+import config
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,20 +10,7 @@ bottom_node_ids = []
 left_node_ids = []
 right_node_ids = []
 
-color_map = {
-    0: 'gray',  # boundaries
-    1: 'green', # open spaces
-    2: 'blue',  # npcs
-    3: 'orange', # stairs (need separate number?), entrances, exits,
-    4: 'magenta', # ledges
-    5: 'red', # main character,
-    6: 'green' # open space
-}
-
-NUM_SCREEN_ROWS =  9
-NUM_SCREEN_COLS = 15
-
-player_node_id = f'{NUM_SCREEN_ROWS // 2}_{NUM_SCREEN_COLS // 2}'
+player_node_id = f'{config.NUM_SCREEN_ROWS // 2}_{config.NUM_SCREEN_COLS // 2}'
 
 def init_node_id_lists():
     global top_node_ids
@@ -30,13 +18,13 @@ def init_node_id_lists():
     global left_node_ids
     global right_node_ids
 
-    for i in range(NUM_SCREEN_COLS):
+    for i in range(config.NUM_SCREEN_COLS):
         top_node_ids.append(f'0_{i}')
-        bottom_node_ids.append(f'{NUM_SCREEN_ROWS - 1}_{i}')
+        bottom_node_ids.append(f'{config.NUM_SCREEN_ROWS - 1}_{i}')
     
-    for i in range(NUM_SCREEN_ROWS):
+    for i in range(config.NUM_SCREEN_ROWS):
         left_node_ids.append(f'{i}_0')
-        right_node_ids.append(f'{i}_{NUM_SCREEN_COLS - 1}')
+        right_node_ids.append(f'{i}_{config.NUM_SCREEN_COLS - 1}')
 
 
 def create_graph_from_state(state: List[List[int]]) -> nx.DiGraph:
@@ -51,15 +39,15 @@ def create_graph_from_state(state: List[List[int]]) -> nx.DiGraph:
     G = nx.DiGraph()
 
     # Add nodes
-    for i in range(NUM_SCREEN_ROWS):
-        for j in range(NUM_SCREEN_COLS):
+    for i in range(config.NUM_SCREEN_ROWS):
+        for j in range(config.NUM_SCREEN_COLS):
             node_id = f'{i}_{j}'
             G.add_node(node_id, pos=(j, -i), value=state[i][j])
 
     # Add edges
     edges_to_add = []
-    for i in range(NUM_SCREEN_ROWS):
-        for j in range(NUM_SCREEN_COLS):
+    for i in range(config.NUM_SCREEN_ROWS):
+        for j in range(config.NUM_SCREEN_COLS):
             node_id = f"{i}_{j}"
             node_edges = connect_node(G, node_id)
             if len(node_edges) > 0:
@@ -73,7 +61,7 @@ def create_graph_from_state(state: List[List[int]]) -> nx.DiGraph:
 def draw_graph(graph):
     pos = nx.get_node_attributes(graph, 'pos')
     node_values = [node[1]['value'] for node in graph.nodes(data=True)]
-    node_colors = [color_map[value] for value in node_values]
+    node_colors = [config.COLOR_MAP[value] for value in node_values]
 
     nx.draw(graph, pos, node_color=node_colors, with_labels=True)
     plt.show()
@@ -215,8 +203,8 @@ def get_move_direction(prev_state, new_state):
 def update_player_loc_on_graph(graph, state, move):
     global player_node_id
 
-    prev_row_idx = NUM_SCREEN_ROWS // 2
-    prev_col_idx = NUM_SCREEN_COLS // 2
+    prev_row_idx = config.NUM_SCREEN_ROWS // 2
+    prev_col_idx = config.NUM_SCREEN_COLS // 2
 
     row, col = map(int, player_node_id.split('_'))
     prev_node_id = f'{row}_{col}'
@@ -274,7 +262,7 @@ def update_screen_boundaries(new_node_ids, move):
         right_node_ids.pop()
 
         # bottom_node_ids: iterate through and decrement each row aka {row - 1}_{col}
-        for i in range(NUM_SCREEN_COLS):
+        for i in range(config.NUM_SCREEN_COLS):
             row, col = map(int, bottom_node_ids[i].split('_'))
             bottom_node_ids[i] = f'{row - 1}_{col}'
 
@@ -291,7 +279,7 @@ def update_screen_boundaries(new_node_ids, move):
         left_node_ids.pop(0)
 
         # top_node_ids: iterate through and increment each row aka {row + 1}_{col}
-        for i in range(NUM_SCREEN_COLS):
+        for i in range(config.NUM_SCREEN_COLS):
             row, col = map(int, top_node_ids[i].split('_'))
             top_node_ids[i] = f'{row + 1}_{col}'
 
@@ -308,7 +296,7 @@ def update_screen_boundaries(new_node_ids, move):
         bottom_node_ids.pop()
 
         # right_node_ids: iterate through and decrement each row aka {row}_{col - 1}
-        for i in range(NUM_SCREEN_ROWS):
+        for i in range(config.NUM_SCREEN_ROWS):
             row, col = map(int, right_node_ids[i].split('_'))
             right_node_ids[i] = f'{row}_{col - 1}'
         
@@ -325,7 +313,7 @@ def update_screen_boundaries(new_node_ids, move):
         bottom_node_ids.pop(0)
 
         # left_node_ids: iterate through and increment each row aka {row}_{col + 1}
-        for i in range(NUM_SCREEN_ROWS):
+        for i in range(config.NUM_SCREEN_ROWS):
             row, col = map(int, left_node_ids[i].split('_'))
             left_node_ids[i] = f'{row}_{col + 1}'
 
@@ -382,13 +370,13 @@ def update_graph(graph, prev_state, new_state):
         print(f'Player moved {move}')
         # Assign variables with the correct value based on move direction
         if move in ('up', 'down'):
-            num_new_nodes = NUM_SCREEN_COLS
+            num_new_nodes = config.NUM_SCREEN_COLS
             edge_row_node_ids = top_node_ids if move == 'up' else bottom_node_ids
             edge_row_num = int(edge_row_node_ids[0].split('_')[0])
             new_row_num = edge_row_num - 1 if move == 'up' else edge_row_num + 1
             new_env = new_state[0] if move == 'up' else new_state[-1]
         elif move in ('left', 'right'):
-            num_new_nodes = NUM_SCREEN_ROWS
+            num_new_nodes = config.NUM_SCREEN_ROWS
             edge_row_node_ids = left_node_ids if move == 'left' else right_node_ids
             edge_row_num = int(edge_row_node_ids[0].split('_')[1])
             new_row_num = edge_row_num - 1 if move == 'left' else edge_row_num + 1
