@@ -8,5 +8,7 @@ COLOR_MAP = {
     3: 'orange', # stairs (need separate number?), entrances, exits,
     4: 'magenta', # ledges
     5: 'red', # main character,
-    6: 'green' # open space
+    6: 'green', # grass (open space)
+    7: 'yellow', # sign
+    8: 'blue' # water
 }

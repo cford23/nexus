@@ -1,4 +1,9 @@
-import config
+# So files can be run independently or as a submodule
+try:
+    from . import config
+except ImportError:
+    import config
+
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
