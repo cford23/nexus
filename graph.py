@@ -132,23 +132,23 @@ class Graph:
             # Update graph from differences
             for node_id, (_, new_value) in differences:
                 # Update node with its new value
-                graph.nodes[node_id]['value'] = new_value
+                self.graph.nodes[node_id]['value'] = new_value
 
                 # Get all of node's neighbors
-                neighbors = set(graph.successors(node_id)).union(set(graph.predecessors(node_id)))
+                neighbors = set(self.graph.successors(node_id)).union(set(self.graph.predecessors(node_id)))
 
                 # Remove all in out edges for node
-                edges_to_remove = list(graph.in_edges(node_id)) + list(graph.out_edges(node_id))
-                graph.remove_edges_from(edges_to_remove)
+                edges_to_remove = list(self.graph.in_edges(node_id)) + list(self.graph.out_edges(node_id))
+                self.graph.remove_edges_from(edges_to_remove)
 
                 # Connect node with its neighbors accordingly
                 edges = []
                 for node in neighbors:
                     edges.extend(self.__connect_node(node))
-                graph.add_edges_from(edges)
+                self.graph.add_edges_from(edges)
 
             # Update player location on graph
-            graph = self.__update_player_loc_on_graph(move)
+            self.graph = self.__update_player_loc_on_graph(move)
 
             # Update screen boundary lists
             self.__update_screen_boundaries(new_node_ids, move)        
